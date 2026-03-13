@@ -35,7 +35,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
 
     // Make a request to SendDB to know if the level's sent or not
     let url: String = format!("{}{}", state.api_endpoint_url, level_id);
-    match reqwest::get(&url).await {
+    match state.client.get(&url).send().await {
         Ok(response) => match response.json::<serde_json::Value>().await {
             Ok(body) => {
                 // If the sends object isn't empty then it's sent

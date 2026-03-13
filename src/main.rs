@@ -1,5 +1,6 @@
 use axum::{Router, http::HeaderMap, routing::get};
 use dotenv::dotenv;
+use reqwest::Client;
 use sqlx::SqlitePool;
 use std::{collections::HashMap, env, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, time::sleep};
@@ -12,6 +13,7 @@ use crate::endpoints::{check_level, root};
 #[derive(Clone)]
 struct AppState {
     connection: SqlitePool,
+    client: Client,
     not_sent: Arc<Mutex<HashMap<i32, i64>>>,
     api_endpoint_url: String,
     sent_cache_headers: HeaderMap,
@@ -64,6 +66,10 @@ async fn main() {
 
     let state: AppState = AppState {
         connection: db::open().await,
+        client: Client::builder()
+            .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")))
+            .build()
+            .unwrap(),
         api_endpoint_url: env::var("api_endpoint_url")
             .unwrap_or_else(|_| "https://api.senddb.dev/api/v1/level/".to_string()),
         not_sent: Arc::new(Mutex::new(HashMap::new())),
