@@ -1,6 +1,6 @@
 use axum::{Router, http::HeaderMap, routing::get};
 use dotenv::dotenv;
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use sqlx::SqlitePool;
 use std::{collections::HashMap, env, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, time::sleep};
@@ -64,12 +64,25 @@ async fn main() {
             .unwrap(),
     );
 
+    let client_builder: ClientBuilder = Client::builder()
+        .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")));
+
+    let client: Client = if let Ok(token) = env::var("ENDPOINT_TOKEN") {
+        println!("Endpoint token set, using a bearer token for authentication");
+
+        let mut headers: HeaderMap = HeaderMap::new();
+        headers.insert("Authorization", format!("Bearer {token}").parse().unwrap());
+
+        client_builder.default_headers(headers)
+    } else {
+        client_builder
+    }
+    .build()
+    .unwrap();
+
     let state: AppState = AppState {
         connection: db::open().await,
-        client: Client::builder()
-            .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")))
-            .build()
-            .unwrap(),
+        client,
         api_endpoint_url: env::var("api_endpoint_url")
             .unwrap_or_else(|_| "https://api.senddb.dev/api/v1/level/".to_string()),
         not_sent: Arc::new(Mutex::new(HashMap::new())),
