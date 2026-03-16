@@ -31,6 +31,7 @@ pub async fn open() -> SqlitePool {
     return pool;
 }
 
+// Get the total amount of sent levels stored in the permanent cache
 pub async fn get_total_sent_levels(pool: &SqlitePool) -> i64 {
     return sqlx::query_scalar("SELECT COUNT(*) FROM sent")
         .fetch_one(pool)
