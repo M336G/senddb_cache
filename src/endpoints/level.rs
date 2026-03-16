@@ -4,6 +4,40 @@ use serde_json::json;
 
 use crate::{AppState, db};
 
+#[utoipa::path(
+    get,
+    path = "/level/{id}",
+    summary = "Check if a level has been sent",
+    description = "Check whether a Geometry Dash level has been sent or not",
+    tag = "Levels",
+    params(
+        ("id" = u32, description = "A level ID to check")
+    ),
+    responses(
+        (status = 200, description = "Level sent state successfully retrieved",
+            body = serde_json::Value,
+            example = json!({
+                "error": null,
+                "sent": true
+            })
+        ),
+        (status = 400, description = "Invalid level ID",
+            body = serde_json::Value,
+            example = json!({
+                "error": "Invalid level ID",
+                "sent": null
+            })
+        ),
+        (status = 500, description = "Internal server error",
+            body = serde_json::Value,
+            example = json!({
+                "error": "Unknown Error",
+                "sent": null
+            })
+        )
+    )
+)]
+
 // Check if a level has been sent or not
 pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) -> Response {
     // If the level level_id isn't an integer or is less than/equal to 0, return 400

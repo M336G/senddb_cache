@@ -28,13 +28,15 @@ cd senddb_cache
 ## Usage
 Once you've got your instance running, you may use these endpoints:
 
-| Method | Endpoint      | Description                           |
-|--------|---------------|---------------------------------------|
-| `GET`  | `/`           | Check if the server's up or not       |
-| `GET`  | `/stats`      | Get some statistics about the server  |
-| `GET`  | `/level/<id>` | Check if a level has been sent or not |
+| Method | Endpoint                | Description                                |
+|--------|-------------------------|--------------------------------------------|
+| `GET`  | `/`                     | Check if the server's up or                |
+| `GET`  | `/stats`                | Get some statistics about the server       |
+| `GET`  | `/level/<id>`           | Check if a level has been sent or not      |
+| `GET`  | `/swagger`              | Get documentation about each endpoint      |
+| `GET`  | `/swagger/openapi.json` | Get JSON documentation about each endpoint |
 
-Responses to the latter endpoint will look like this:
+Responses to `GET /level/<id>` will look like this:
 ```json
 {
     "error": null,

@@ -2,12 +2,17 @@ use axum::{Router, http::HeaderMap, routing::get};
 use dotenv::dotenv;
 use reqwest::{Client, ClientBuilder};
 use sqlx::SqlitePool;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 use std::{collections::HashMap, env, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, time::sleep};
 
 mod db;
 mod endpoints;
+mod openapi;
+
 use crate::endpoints::{health_check, get_stats, check_level};
+use crate::openapi::ApiDoc;
 
 // Stores some "global variables" which will be used across the whole program
 #[derive(Clone)]
@@ -111,10 +116,14 @@ async fn main() {
         }
     });
 
+    let openapi: utoipa::openapi::OpenApi = ApiDoc::openapi();
+
     let app: Router = Router::new()
         .route("/", get(health_check))
         .route("/stats", get(get_stats))
         .route("/level/{id}", get(check_level))
+        .merge(SwaggerUi::new("/swagger")
+        .url("/swagger/openapi.json", openapi))
         .with_state(state);
 
     println!("Server running on http://0.0.0.0:{server_port}/");
