@@ -30,7 +30,8 @@ Once you've got your instance running, you may use these endpoints:
 
 | Method | Endpoint      | Description                           |
 |--------|---------------|---------------------------------------|
-| `GET`  | `/`           | Redirects to SendDB's main page       |
+| `GET`  | `/`           | Check if the server's up or not       |
+| `GET`  | `/stats`      | Get some statistics about the server  |
 | `GET`  | `/level/<id>` | Check if a level has been sent or not |
 
 Responses to the latter endpoint will look like this:

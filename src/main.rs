@@ -7,7 +7,7 @@ use tokio::{sync::Mutex, time::sleep};
 
 mod db;
 mod endpoints;
-use crate::endpoints::{check_level, root};
+use crate::endpoints::{health_check, get_stats, check_level};
 
 // Stores some "global variables" which will be used across the whole program
 #[derive(Clone)]
@@ -112,7 +112,8 @@ async fn main() {
     });
 
     let app: Router = Router::new()
-        .route("/", get(root))
+        .route("/", get(health_check))
+        .route("/stats", get(get_stats))
         .route("/level/{id}", get(check_level))
         .with_state(state);
 

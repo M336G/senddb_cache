@@ -31,6 +31,13 @@ pub async fn open() -> SqlitePool {
     return pool;
 }
 
+pub async fn get_total_sent_levels(pool: &SqlitePool) -> i64 {
+    return sqlx::query_scalar("SELECT COUNT(*) FROM sent")
+        .fetch_one(pool)
+        .await
+        .unwrap()
+}
+
 // Add a level to the permanent sent levels cache
 pub async fn add_sent_level(pool: &SqlitePool, id: u32) {
     sqlx::query("INSERT OR IGNORE INTO sent (id) VALUES (?)")
