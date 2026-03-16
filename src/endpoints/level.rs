@@ -7,11 +7,11 @@ use crate::{AppState, db};
 // Check if a level has been sent or not
 pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) -> Response {
     // If the level level_id isn't an integer or is less than/equal to 0, return 400
-    let level_id: i32 = match id.trim().parse() {
-        Ok(level_id) => level_id,
-        Err(_) => return (
+    let level_id: u32 = match id.trim().parse() {
+        Ok(level_id) if level_id > 0 => level_id,
+        _ => return (
             StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "Invalid level_id", "sent": null })),
+            Json(json!({ "error": "Invalid level ID", "sent": null })),
         ).into_response(),
     };
 

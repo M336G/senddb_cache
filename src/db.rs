@@ -32,7 +32,7 @@ pub async fn open() -> SqlitePool {
 }
 
 // Add a level to the permanent sent levels cache
-pub async fn add_sent_level(pool: &SqlitePool, id: i32) {
+pub async fn add_sent_level(pool: &SqlitePool, id: u32) {
     sqlx::query("INSERT OR IGNORE INTO sent (id) VALUES (?)")
         .bind(id)
         .execute(pool)
@@ -41,7 +41,7 @@ pub async fn add_sent_level(pool: &SqlitePool, id: i32) {
 }
 
 // Check if a level's present in the permanent sent levels cache
-pub async fn is_level_sent(pool: &SqlitePool, id: i32) -> bool {
+pub async fn is_level_sent(pool: &SqlitePool, id: u32) -> bool {
     return sqlx::query("SELECT 1 FROM sent WHERE id = ?")
         .bind(id)
         .fetch_optional(pool)

@@ -14,7 +14,7 @@ use crate::endpoints::{check_level, root};
 struct AppState {
     connection: SqlitePool,
     client: Client,
-    not_sent: Arc<Mutex<HashMap<i32, i64>>>,
+    not_sent: Arc<Mutex<HashMap<u32, i64>>>,
     api_endpoint_url: String,
     sent_cache_headers: HeaderMap,
     not_sent_cache_headers: HeaderMap,
