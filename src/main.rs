@@ -24,6 +24,7 @@ struct AppState {
     api_endpoint_url: String,
     sent_cache_headers: HeaderMap,
     not_sent_cache_headers: HeaderMap,
+    soggy_image: Arc<Vec<u8>> // ummmm
 }
 
 #[tokio::main]
@@ -94,6 +95,7 @@ async fn main() {
         not_sent: Arc::new(DashMap::new()),
         sent_cache_headers,
         not_sent_cache_headers,
+        soggy_image: Arc::new(tokio::fs::read("assets/soggy.webp").await.unwrap())
     };
     println!("SendDB API's endpoint URL set to {}", state.api_endpoint_url);
 
