@@ -72,7 +72,8 @@ async fn main() {
     );
 
     let client_builder = Client::builder()
-        .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")));
+        .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")))
+        .timeout(Duration::from_secs(10));
 
     let client = if let Ok(token) = env::var("ENDPOINT_TOKEN") {
         println!("Endpoint token set, using a bearer token for authentication");
