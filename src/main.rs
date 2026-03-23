@@ -88,7 +88,7 @@ async fn main() {
     let state: AppState = AppState {
         connection: db::open().await,
         client,
-        api_endpoint_url: env::var("api_endpoint_url")
+        api_endpoint_url: env::var("ENDPOINT_URL")
             .unwrap_or_else(|_| "https://api.senddb.dev/api/v1/level/".to_string()),
         not_sent: Arc::new(Mutex::new(HashMap::new())),
         sent_cache_headers,
