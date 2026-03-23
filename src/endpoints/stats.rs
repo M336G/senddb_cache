@@ -28,7 +28,7 @@ use crate::{AppState, db};
 )]
 
 pub async fn get_stats(State(state): State<AppState>) -> Json<serde_json::Value> {
-    return Json(json!({
+    Json(json!({
         "error": null,
         "stats": {
             "version": env!("CARGO_PKG_VERSION"),
@@ -37,5 +37,5 @@ pub async fn get_stats(State(state): State<AppState>) -> Json<serde_json::Value>
                 "not_sent": state.not_sent.len()
             }
         }
-    }));
+    }))
 }

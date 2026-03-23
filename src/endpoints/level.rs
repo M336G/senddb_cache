@@ -75,7 +75,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
                 // If the sends object isn't empty then it's sent
                 let has_sends = body["sends"]
                     .as_array()
-                    .map(|array| array.len() > 0)
+                    .map(|array| !array.is_empty())
                     .unwrap_or(false);
 
                 if has_sends {
