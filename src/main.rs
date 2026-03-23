@@ -1,6 +1,6 @@
 use axum::{Router, http::HeaderMap, routing::get};
 use dotenv::dotenv;
-use reqwest::{Client, ClientBuilder};
+use reqwest::Client;
 use sqlx::SqlitePool;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -34,24 +34,24 @@ async fn main() {
     // Initialize all needed variables here
     let server_port: u16 = env::var("PORT")
         .ok()
-        .and_then(|port: String| port.parse().ok())
+        .and_then(|port| port.parse().ok())
         .unwrap_or(8273);
 
     let not_sent_expiration: u32 = env::var("NOT_SENT_EXPIRATION")
         .ok()
-        .and_then(|expiration: String| expiration.parse().ok())
+        .and_then(|expiration| expiration.parse().ok())
         .unwrap_or(5);
     println!("Expiration for not sent levels set to {not_sent_expiration} minutes");
 
     let sent_cache: u32 = env::var("SENT_CACHE")
         .ok()
-        .and_then(|time: String| time.parse().ok())
+        .and_then(|time| time.parse().ok())
         .unwrap_or(60);
     println!("Sent levels set to be cached for {sent_cache} minutes");
 
     let not_sent_cache: u32 = env::var("NOT_SENT_CACHE")
         .ok()
-        .and_then(|time: String| time.parse().ok())
+        .and_then(|time| time.parse().ok())
         .unwrap_or(5);
     println!("Not sent levels set to be cached for {not_sent_cache} minutes");
 
@@ -71,13 +71,13 @@ async fn main() {
             .unwrap(),
     );
 
-    let client_builder: ClientBuilder = Client::builder()
+    let client_builder = Client::builder()
         .user_agent(format!("SendDBCache/{}", env!("CARGO_PKG_VERSION")));
 
-    let client: Client = if let Ok(token) = env::var("ENDPOINT_TOKEN") {
+    let client = if let Ok(token) = env::var("ENDPOINT_TOKEN") {
         println!("Endpoint token set, using a bearer token for authentication");
 
-        let mut headers: HeaderMap = HeaderMap::new();
+        let mut headers = HeaderMap::new();
         headers.insert("Authorization", format!("Bearer {token}").parse().unwrap());
 
         client_builder.default_headers(headers)
@@ -87,7 +87,7 @@ async fn main() {
     .build()
     .unwrap();
 
-    let state: AppState = AppState {
+    let state = AppState {
         connection: db::open().await,
         client,
         api_endpoint_url: env::var("ENDPOINT_URL")
@@ -101,17 +101,17 @@ async fn main() {
 
     // Routine that'll check for expired not sent levels (so that they are re-checked)
     // every minute
-    let state_for_cleanup: AppState = state.clone();
+    let state_for_cleanup = state.clone();
     tokio::spawn(async move {
         loop {
             sleep(Duration::from_mins(1)).await;
-            let now: i64 = std::time::SystemTime::now()
+            let now = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as i64;
             state_for_cleanup
                 .not_sent
-                .retain(|_, timestamp: &mut i64| {
+                .retain(|_, timestamp| {
                     now - *timestamp < not_sent_expiration as i64 * 60
                 });
         }
@@ -119,7 +119,7 @@ async fn main() {
 
     let openapi: utoipa::openapi::OpenApi = ApiDoc::openapi();
 
-    let app: Router = Router::new()
+    let app = Router::new()
         .route("/", get(health_check))
         .route("/stats", get(get_stats))
         .route("/level/{id}", get(check_level))

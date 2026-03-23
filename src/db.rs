@@ -4,11 +4,11 @@ use sqlx::{SqlitePool, sqlite::SqliteConnectOptions};
 pub async fn open() -> SqlitePool {
     std::fs::create_dir_all("data").unwrap();
 
-    let options: sqlx::sqlite::SqliteConnectOptions = SqliteConnectOptions::new()
+    let options = SqliteConnectOptions::new()
         .filename("data/database.db")
         .create_if_missing(true);
 
-    let pool: sqlx::Pool<sqlx::Sqlite> = SqlitePool::connect_with(options)
+    let pool = SqlitePool::connect_with(options)
         .await
         .unwrap();
 
@@ -28,12 +28,12 @@ pub async fn open() -> SqlitePool {
     .await
     .unwrap();
 
-    return pool;
+    pool
 }
 
 // Get the total amount of sent levels stored in the permanent cache
 pub async fn get_total_sent_levels(pool: &SqlitePool) -> i64 {
-    return sqlx::query_scalar("SELECT COUNT(*) FROM sent")
+    sqlx::query_scalar("SELECT COUNT(*) FROM sent")
         .fetch_one(pool)
         .await
         .unwrap()
@@ -50,10 +50,10 @@ pub async fn add_sent_level(pool: &SqlitePool, id: u32) {
 
 // Check if a level's present in the permanent sent levels cache
 pub async fn is_level_sent(pool: &SqlitePool, id: u32) -> bool {
-    return sqlx::query("SELECT 1 FROM sent WHERE id = ?")
+    sqlx::query("SELECT 1 FROM sent WHERE id = ?")
         .bind(id)
         .fetch_optional(pool)
         .await
         .unwrap()
-        .is_some();
+        .is_some()
 }

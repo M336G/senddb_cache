@@ -73,9 +73,9 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
         Ok(response) => match response.json::<serde_json::Value>().await {
             Ok(body) => {
                 // If the sends object isn't empty then it's sent
-                let has_sends: bool = body["sends"]
+                let has_sends = body["sends"]
                     .as_array()
-                    .map(|arr: &Vec<serde_json::Value>| arr.len() > 0)
+                    .map(|array| array.len() > 0)
                     .unwrap_or(false);
 
                 if has_sends {
@@ -90,7 +90,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
                     ).into_response();
                 } else {
                     // Cache the level temporarily
-                    let timestamp: i64 = std::time::SystemTime::now()
+                    let timestamp = std::time::SystemTime::now()
                         .duration_since(std::time::UNIX_EPOCH)
                         .unwrap()
                         .as_secs() as i64;
