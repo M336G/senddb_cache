@@ -34,7 +34,7 @@ pub async fn get_stats(State(state): State<AppState>) -> Json<serde_json::Value>
             "version": env!("CARGO_PKG_VERSION"),
             "cached": {
                 "sent": db::get_total_sent_levels(&state.connection).await,
-                "not_sent": state.not_sent.lock().await.len()
+                "not_sent": state.not_sent.len()
             }
         }
     }));

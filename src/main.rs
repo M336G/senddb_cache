@@ -4,8 +4,9 @@ use reqwest::{Client, ClientBuilder};
 use sqlx::SqlitePool;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use std::{collections::HashMap, env, sync::Arc, time::Duration};
-use tokio::{sync::Mutex, time::sleep};
+use std::{env, sync::Arc, time::Duration};
+use dashmap::DashMap;
+use tokio::time::sleep;
 
 mod db;
 mod endpoints;
@@ -19,7 +20,7 @@ use crate::openapi::ApiDoc;
 struct AppState {
     connection: SqlitePool,
     client: Client,
-    not_sent: Arc<Mutex<HashMap<u32, i64>>>,
+    not_sent: Arc<DashMap<u32, i64>>,
     api_endpoint_url: String,
     sent_cache_headers: HeaderMap,
     not_sent_cache_headers: HeaderMap,
@@ -90,7 +91,7 @@ async fn main() {
         client,
         api_endpoint_url: env::var("ENDPOINT_URL")
             .unwrap_or_else(|_| "https://api.senddb.dev/api/v1/level/".to_string()),
-        not_sent: Arc::new(Mutex::new(HashMap::new())),
+        not_sent: Arc::new(DashMap::new()),
         sent_cache_headers,
         not_sent_cache_headers,
     };
@@ -108,8 +109,6 @@ async fn main() {
                 .as_secs() as i64;
             state_for_cleanup
                 .not_sent
-                .lock()
-                .await
                 .retain(|_, timestamp: &mut i64| {
                     now - *timestamp < not_sent_expiration as i64 * 60
                 });

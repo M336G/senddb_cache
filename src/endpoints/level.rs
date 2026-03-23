@@ -59,7 +59,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
     }
 
     // If the temporary cache for not sent levels has the level, return false directly
-    if state.not_sent.lock().await.contains_key(&level_id) {
+    if state.not_sent.contains_key(&level_id) {
         return (
             StatusCode::OK,
             state.not_sent_cache_headers,
@@ -81,7 +81,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
                 if has_sends {
                     // Cache the level permanently
                     db::add_sent_level(&state.connection, level_id).await;
-                    state.not_sent.lock().await.remove(&level_id);
+                    state.not_sent.remove(&level_id);
 
                     return (
                         StatusCode::OK,
@@ -94,7 +94,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
                         .duration_since(std::time::UNIX_EPOCH)
                         .unwrap()
                         .as_secs() as i64;
-                    state.not_sent.lock().await.insert(level_id, timestamp);
+                    state.not_sent.insert(level_id, timestamp);
 
                     return (
                         StatusCode::OK,
