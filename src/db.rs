@@ -1,4 +1,12 @@
+use std::sync::OnceLock;
+use dashmap::DashSet;
 use sqlx::{SqlitePool, sqlite::SqliteConnectOptions};
+
+static SENT_CACHE: OnceLock<DashSet<u32>> = OnceLock::new();
+
+fn sent_cache() -> &'static DashSet<u32> {
+    SENT_CACHE.get_or_init(|| DashSet::new())
+}
 
 // Initialize the database
 pub async fn open() -> SqlitePool {
@@ -28,6 +36,15 @@ pub async fn open() -> SqlitePool {
     .await
     .unwrap();
 
+    let ids: Vec<u32> = sqlx::query_scalar("SELECT id FROM sent")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+
+    for id in ids {
+        sent_cache().insert(id);
+    }
+
     pool
 }
 
@@ -41,6 +58,8 @@ pub async fn get_total_sent_levels(pool: &SqlitePool) -> i64 {
 
 // Add a level to the permanent sent levels cache
 pub async fn add_sent_level(pool: &SqlitePool, id: u32) {
+    sent_cache().insert(id);
+
     sqlx::query("INSERT OR IGNORE INTO sent (id) VALUES (?)")
         .bind(id)
         .execute(pool)
@@ -50,6 +69,10 @@ pub async fn add_sent_level(pool: &SqlitePool, id: u32) {
 
 // Check if a level's present in the permanent sent levels cache
 pub async fn is_level_sent(pool: &SqlitePool, id: u32) -> bool {
+    if sent_cache().contains(&id) {
+        return true;
+    }
+    
     sqlx::query("SELECT 1 FROM sent WHERE id = ?")
         .bind(id)
         .fetch_optional(pool)
