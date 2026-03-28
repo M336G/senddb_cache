@@ -2,11 +2,15 @@ use axum::{Router, http::HeaderMap, routing::get};
 use dotenv::dotenv;
 use reqwest::Client;
 use sqlx::SqlitePool;
+use tower_http::compression::CompressionLayer;
+use axum::http::Method;
+use tower_http::cors::{self, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use std::{env, sync::Arc, time::Duration};
 use dashmap::DashMap;
 use tokio::time::sleep;
+use tokio::net::TcpListener;
 
 mod db;
 mod endpoints;
@@ -126,11 +130,16 @@ async fn main() {
         .route("/level/{id}", get(check_level))
         .merge(SwaggerUi::new("/swagger")
         .url("/swagger/openapi.json", openapi))
+        .layer(CompressionLayer::new())
+        .layer(CorsLayer::new()
+            .allow_origin(cors::Any)
+            .allow_methods([Method::GET])
+        )
         .with_state(state);
 
     println!("Server running on http://0.0.0.0:{server_port}/");
     axum::serve(
-        tokio::net::TcpListener::bind(format!("0.0.0.0:{server_port}"))
+        TcpListener::bind(format!("0.0.0.0:{server_port}"))
             .await
             .unwrap(),
         app,
