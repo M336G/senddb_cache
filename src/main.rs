@@ -16,7 +16,7 @@ mod db;
 mod endpoints;
 mod openapi;
 
-use crate::endpoints::{health_check, get_stats, check_level};
+use crate::endpoints::{check_level, get_stats, handle_ws, health_check};
 use crate::openapi::ApiDoc;
 
 // Stores some "global variables" which will be used across the whole program
@@ -128,6 +128,7 @@ async fn main() {
         .route("/", get(health_check))
         .route("/stats", get(get_stats))
         .route("/level/{id}", get(check_level))
+        .route("/ws", get(handle_ws))
         .merge(SwaggerUi::new("/swagger")
         .url("/swagger/openapi.json", openapi))
         .layer(CompressionLayer::new())

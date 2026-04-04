@@ -104,7 +104,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
                 }
             }
             Err(error) => {
-                eprintln!("Empty body error: {error}");
+                eprintln!("Empty body error: {error:?}");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(json!({ "error": "Unknown Error", "sent": null })),
@@ -112,7 +112,7 @@ pub async fn check_level(State(state): State<AppState>, Path(id): Path<String>) 
             }
         },
         Err(error) => {
-            eprintln!("Response error: {error}");
+            eprintln!("Response error: {error:?}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(json!({ "error": "Unknown Error", "sent": null })),

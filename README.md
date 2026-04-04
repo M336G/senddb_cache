@@ -33,6 +33,7 @@ Once you've got your instance running, you may use these endpoints:
 | `GET`  | `/`                     | Check if the server's up or                |
 | `GET`  | `/stats`                | Get some statistics about the server       |
 | `GET`  | `/level/<id>`           | Check if a level has been sent or not      |
+| `GET`  | `/ws`                   | Initializes a new WebSocket connection     |
 | `GET`  | `/swagger`              | Get documentation about each endpoint      |
 | `GET`  | `/swagger/openapi.json` | Get JSON documentation about each endpoint |
 
@@ -45,6 +46,26 @@ Responses to `GET /level/<id>` will look like this:
 ```
 - `error` will be `null` on success or a string describing the error
 - `sent` will be `true` if the level has been sent, `false` if not, or `null` if an error occurred
+
+**Additionally, if you are looking for something more efficient, you may use the WebSocket endpoint:**
+
+Once connected to `GET /ws`, you may send any of the following:
+- `{ "type": "status" }`: allows you to check if the connection's still up or not (it will just return `{ "error": null }`)
+- `{ "type": "stats" }`: returns statistics about the server (same response as `GET /stats`)
+- `{ "type": "level", "ids": [id1, id2, ...] }`: checks if one or multiple levels have been sent (up to 50 at a time)
+
+Responses to `{ "type": "level", ... }` will look like this:
+```json
+{
+    "error": null,
+    "levels": {
+        "6508283": { "error": null, "sent": false },
+        "128279390": { "error": null, "sent": true }
+    }
+}
+```
+
+*Each level entry has the same kind of response as `GET /level/<id>`*
 
 ## License
 This project is licensed under the [MIT License](https://github.com/M336G/senddb_cache/blob/main/LICENSE).
